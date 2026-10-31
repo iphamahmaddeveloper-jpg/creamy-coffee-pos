@@ -1,0 +1,27 @@
+{
+  "name": "creamy-coffee-pos",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Aplikasi POS Kasir Cafe & F&B Lengkap (Resep & Bahan Baku, Tracking Inventori & HPP, Cetak Struk & Label Cup, Scan Barcode, Audit Staf Kasir)",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "node server/index.js",
+    "client": "vite --port 5175",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "lucide-react": "^1.16.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
+    "tailwindcss": "^4.2.2",
+    "vite": "^8.0.9"
+  }
+}
