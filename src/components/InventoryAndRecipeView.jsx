@@ -81,8 +81,10 @@ export default function InventoryAndRecipeView({
     if (!prod) return 0;
     if (!prod.hasRecipe) return Number(prod.manualHpp || 0);
     return (prod.recipe || []).reduce((sum, r) => {
-      const ing = ingredients.find((i) => i.id === r.ingredientId);
-      return sum + (ing ? Number(r.qty || 0) * Number(ing.costPerUnit) : 0);
+      const ing = (ingredients || []).find((i) => i.id === r.ingredientId);
+      const cost = ing ? Number(ing.costPerUnit || ing.unitCost || 0) : 0;
+      const qty = Number(r.qty || r.amount || 0);
+      return sum + (cost * qty);
     }, 0);
   };
 
@@ -311,13 +313,13 @@ export default function InventoryAndRecipeView({
                   <div>
                     <div className="text-[10px] text-slate-500">HPP / Porsi</div>
                     <div className="text-xs font-bold text-rose-600">
-                      Rp {prod.computedHpp.toLocaleString('id-ID')}
+                      Rp {Number(prod.computedHpp || 0).toLocaleString('id-ID')}
                     </div>
                   </div>
                   <div className="border-x border-slate-200">
                     <div className="text-[10px] text-slate-500">Laba Kotor</div>
                     <div className="text-xs font-bold text-emerald-600">
-                      +Rp {prod.grossMargin.toLocaleString('id-ID')}
+                      +Rp {Number(prod.grossMargin || 0).toLocaleString('id-ID')}
                     </div>
                   </div>
                   <div>
@@ -349,14 +351,14 @@ export default function InventoryAndRecipeView({
                           className="flex items-center justify-between text-xs bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100"
                         >
                           <span className="text-slate-700 font-medium truncate pr-2">
-                            {r.ingredientName}
+                            {r.ingredientName || r.name || 'Bahan'}
                           </span>
                           <div className="text-right shrink-0">
                             <span className="font-bold text-slate-900">
-                              {r.qty} {r.unit}
+                              {r.qty || r.amount || 0} {r.unit}
                             </span>
                             <span className="text-[10px] text-slate-400 ml-1.5">
-                              (Rp {r.lineCost.toLocaleString('id-ID')})
+                              (Rp {Number(r.lineCost ?? r.lineHpp ?? 0).toLocaleString('id-ID')})
                             </span>
                           </div>
                         </div>

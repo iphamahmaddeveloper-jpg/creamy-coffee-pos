@@ -41,25 +41,31 @@ function enrichProducts(products = [], ingredients = []) {
       let minPortions = Infinity;
       const detailedRecipe = prod.recipe.map((r) => {
         const ing = ingMap.get(r.ingredientId);
-        const unitCost = ing ? Number(ing.unitCost || 0) : 0;
-        const lineHpp = unitCost * Number(r.amount || 0);
-        computedHpp += lineHpp;
+        const unitCost = ing ? Number(ing.costPerUnit || ing.unitCost || 0) : 0;
+        const qty = Number(r.qty || r.amount || 0);
+        const lineCost = unitCost * qty;
+        computedHpp += lineCost;
 
         let availableFromThis = 0;
-        if (ing && Number(r.amount) > 0) {
-          availableFromThis = Math.floor(Number(ing.stock || 0) / Number(r.amount));
+        if (ing && qty > 0) {
+          availableFromThis = Math.floor(Number(ing.stock || 0) / qty);
         }
         if (availableFromThis < minPortions) {
           minPortions = availableFromThis;
         }
 
         return {
+          ...r,
           ingredientId: r.ingredientId,
+          ingredientName: ing ? ing.name : 'Bahan tidak ditemukan',
           name: ing ? ing.name : 'Bahan tidak ditemukan',
-          amount: Number(r.amount || 0),
+          qty,
+          amount: qty,
           unit: ing ? ing.unit : '',
+          costPerUnit: unitCost,
           unitCost,
-          lineHpp: Math.round(lineHpp),
+          lineCost: Math.round(lineCost),
+          lineHpp: Math.round(lineCost),
           availableStock: ing ? ing.stock : 0
         };
       });
