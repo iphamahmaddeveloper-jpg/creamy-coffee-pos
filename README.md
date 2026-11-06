@@ -1,35 +1,82 @@
-# CREAMY COFFEE — Aplikasi Web POS Kasir Cafe & F&B
+# CREAMY COFFEE POS — Sistem Kasir & Manajemen Operasional Kafe
+> **Tugas Proyek Kelompok Rekayasa Perangkat Lunak / Sistem Informasi (Pertemuan 6)**  
+> **Tech Stack:** ReactJS + Supabase (PostgreSQL) + Netlify + GitHub  
+> **Repositori:** [github.com/iphamahmaddeveloper-jpg/creamy-coffee-pos](https://github.com/iphamahmaddeveloper-jpg/creamy-coffee-pos)
 
-Aplikasi Point of Sale (POS) Kasir berbasis Web yang dirancang khusus untuk operasional **Cafe, Coffee Shop, Resto & Retail F&B** dengan seluruh fitur inti sesuai referensi:
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/iphamahmaddeveloper-jpg/creamy-coffee-pos)
 
-## Fitur Utama
+---
 
-1. **Kasir Penjualan (POS) Cepat & Simpel (`CREAMY COFFEE - Penjualan`)**
-   - Tampilan identik dengan referensi: Katalog menu bergambar dengan kategori (`Produk Unggulan`, `Coffee`, `Makanan`, `Non Coffee`, `Kemasan`), pencarian & filter harga, pilih **Meja** (`Meja 01` - `Meja 08`, `Take Away`) dan **Pelanggan**.
-   - Kustomisasi pesanan minuman cafe: Level Gula (`Normal Sugar`, `Less Sugar`, `No Sugar`), Level Es (`Normal Ice`, `Less Ice`, `Hot / Panas`), dan catatan khusus.
-   - Tombol **Simpan** (Open Bill / Draft pesanan meja), **Pisah** (**Split Bill** untuk pisah bayar per item), dan **Bayar** (Tunai, QRIS, Debit/EDC).
-2. **Produk Resep (Bill of Materials / BOM) & Bahan Baku**
-   - Setiap menu memiliki komposisi resep bahan baku (contoh: *Matcha* menggunakan `15g Bubuk Matcha Uji`, `150ml Susu Fresh Milk`, `20ml Simple Syrup`, `1 pcs Cup 16oz`).
-   - Saat transaksi dibayar, stok masing-masing bahan baku otomatis terpotong sesuai takaran resep.
-3. **Tracking Stok Inventori & Kalkulasi HPP Otomatis**
-   - Menghitung **HPP (Harga Pokok Penjualan)** dan **Margin Laba Kotor (%)** secara otomatis dari harga satuan bahan baku di resep.
-   - Menampilkan estimasi berapa porsi maksimal yang bisa dibuat dari sisa stok bahan baku saat ini.
-   - Fitur **Restock Belanja Bahan**, **Stock Opname Fisik**, dan pencatatan **Barang Rusak / Waste**.
-4. **Cetak Struk Kasir Thermal & Label Minuman (Cup Sticker)**
-   - **Struk Kasir Thermal (58mm/80mm)** lengkap dengan rincian pesanan, kembalian, dan info Wi-Fi Cafe.
-   - **Label Stiker Cup Minuman** otomatis per gelas (`CUP 1/2`, nama menu, takaran gula/es, catatan khusus, nomor meja, nama pelanggan, dan jam pesanan).
-5. **Scan Barcode Produk & Input Manual**
-   - Mendukung pemindaian kode barcode (EAN/SKU) dengan scanner USB/Bluetooth maupun simulasi cepat di layar.
-6. **Audit Staf Kasir & Rekonsiliasi Shift Laci Kas**
-   - **Manajemen Shift Kasir**: Buka Shift (Modal Awal), Kas Masuk / Kas Keluar operasional, dan Tutup Shift dengan perhitungan otomatis **Selisih Kas (Variance)** antara uang fisik aktual dan ekspektasi sistem.
-   - **Log Audit Staf Kasir (Anti-Fraud Trail)**: Mencatat seluruh aktivitas sensitif staf (Transaksi, Split Bill, Simpan/Hapus Draft, Void Transaksi beserta pengembalian stok, Opname Inventori, dan Kas Keluar).
+## 📌 Ringkasan Proyek
 
-## Cara Menjalankan
+Aplikasi **CREAMY COFFEE POS** adalah sistem kasir Point of Sale berbasis web modern yang dirancang khusus untuk operasional kafe, coffee shop, dan restoran. Antarmuka didesain secara fungsional, bersih, dan ergonomis mengikuti standar industri kasir F&B nyata (seperti Moka POS, Square, dan Toast) tanpa gaya template AI yang artifisial.
+
+### Modul Fungsional Utama:
+1. **Kasir Penjualan Cepat (POS Terminal):** Katalog menu kategori, variasi takaran gula (*Normal/Less/No Sugar*), level es (*Normal/Less/Hot*), pemilihan meja (*Meja 01–08* & *Take Away*), fitur **Simpan Draft Bill**, **Split Bill**, dan multi-pembayaran (**Tunai, QRIS Dinamis, Kartu Debit**).
+2. **Resep Bahan Baku (Bill of Materials / BOM):** Setiap menu terhubung dengan komposisi bahan mentah (gram/ml/pcs). Stok bahan otomatis terpotong saat transaksi berstatus `PAID`.
+3. **Kalkulasi HPP & Margin Laba:** Menghitung Harga Pokok Penjualan (HPP) secara otomatis berdasarkan harga beli bahan baku serta menampilkan estimasi sisa porsi yang dapat dibuat.
+4. **Kitchen Display System (KDS):** Layar antrean pesanan untuk Barista dapur yang tersinkronisasi secara *real-time*.
+5. **Cetak Struk Thermal & Label Cup:** Pratinjau struk thermal 58mm/80mm lengkap dengan info Wi-Fi kafe serta stiker label cup gelas (`CUP 1/2`).
+6. **Audit Anti-Fraud & Rekonsiliasi Shift:** Manajemen buka/tutup shift kasir dengan *blind cash count* untuk mendeteksi selisih kas (*cash variance*).
+
+---
+
+## 📊 Artefak Visual Perancangan Sistem (Pertemuan 6)
+
+Laporan lengkap naratif perancangan dapat diakses di:  
+📄 **[Dokumen Laporan Perancangan POS (docs/LAPORAN_PERANCANGAN_POS.md)](./docs/LAPORAN_PERANCANGAN_POS.md)**
+
+### 1. Use Case Diagram (Batasan Sistem & Aktor)
+Menampilkan 4 aktor (*Kasir, Barista/Dapur, Manajer/Owner, dan Sistem QRIS*) beserta relasi `«include»` dan `«extend»`.
+
+![Use Case Diagram](./docs/use-case-diagram.svg)
+
+### 2. Activity Diagram dengan Swimlane (Fitur Transaksi Inti)
+Memetakan 4 swimlane lintas peran (*Pelanggan, Kasir, Sistem ReactJS + Supabase, dan Barista*) dari inisiasi pesanan hingga serah terima produk.
+
+![Activity Diagram Swimlane](./docs/activity-diagram-swimlane.svg)
+
+---
+
+## 📋 Spesifikasi 3 Use Case Utama
+
+| ID | Nama Use Case | Aktor Utama | Deskripsi Singkat |
+| :--- | :--- | :--- | :--- |
+| **UC-04** | **Proses Transaksi & Pembayaran** | Kasir | Menghitung tagihan, menerima uang tunai / scan QRIS, simpan data ke Supabase, cetak struk kasir & stiker cup, serta kirim tiket ke dapur. |
+| **UC-08** | **Pengurangan Stok Resep (BOM)** | Sistem (Supabase Trigger) | Mengurangi stok bahan mentah di database secara otomatis berdasarkan resep menu begitu pesanan berstatus `PAID`. |
+| **UC-11** | **Rekonsiliasi Shift & Tutup Laci Kas** | Kasir & Manajer | Menghitung fisik kas di laci kasir (*blind count*), mendeteksi selisih kas (*variance*), dan mencetak laporan serah terima shift. |
+
+---
+
+## 🛠️ Arsitektur Teknologi & Database
+
+- **Frontend:** React 19, Tailwind CSS, Lucide Icons, Vite
+- **Backend & Database:** Supabase Cloud (PostgreSQL relasional, Database Triggers, Realtime WebSocket)
+- **File Skema Database Supabase:** [`supabase/schema.sql`](./supabase/schema.sql)
+- **Deployment:** Netlify (dengan konfigurasi SPA fallback di [`netlify.toml`](./netlify.toml))
+- **Version Control:** GitHub
+
+---
+
+## 🚀 Panduan Menjalankan Secara Lokal
 
 ```bash
+# 1. Clone repositori
+git clone https://github.com/iphamahmaddeveloper-jpg/creamy-coffee-pos.git
+cd creamy-coffee-pos
+
+# 2. Install dependensi
 npm install
+
+# 3. Jalankan aplikasi web
+npm run client
+# atau jalankan mode lengkap bersama server mock
 npm run dev
 ```
-- **Frontend Web App**: http://localhost:5175
-- **Backend REST API**: http://localhost:3005
 
+Buka peramban di: `http://localhost:5175`
+
+### Akun Uji Coba (Login Staf):
+- **Kasir:** Username `nadia` | PIN `1234`
+- **Barista:** Username `rizky` | PIN `5678`
+- **Owner / Superadmin:** Username `owner` | PIN `9999`

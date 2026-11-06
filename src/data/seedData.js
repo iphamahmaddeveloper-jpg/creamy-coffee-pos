@@ -1,0 +1,648 @@
+export const initialData = {
+  storeProfile: {
+    name: 'CREAMY COFFEE',
+    tagline: 'Specialty Coffee, Artisan Pastry & Cozy Space',
+    address: 'Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan',
+    phone: '0812-8899-7766',
+    wifiName: 'CreamyCoffee_5G',
+    wifiPass: 'kopidulu2026',
+    taxPercent: 0,
+    servicePercent: 0,
+    receiptFooter: 'Terima kasih telah berkunjung ke Creamy Coffee!\nFollow IG @creamycoffee.id'
+  },
+  staffList: [
+    {
+      id: 'STF-OWNER',
+      username: 'owner',
+      name: 'Hendra Wijaya (Owner Cafe)',
+      role: 'Superadmin / Owner Cafe',
+      accountType: 'SUPERADMIN',
+      pin: '9999',
+      phone: '0811-9988-7766',
+      active: true,
+      lastLoginAt: '2026-10-31T14:50:00.000Z'
+    },
+    {
+      id: 'STF-01',
+      username: 'nadia',
+      name: 'Nadia Putri',
+      role: 'Head Barista & Kasir Pagi',
+      accountType: 'KASIR',
+      pin: '1234',
+      phone: '0812-3344-5566',
+      active: true,
+      lastLoginAt: '2026-10-31T15:00:00.000Z'
+    },
+    {
+      id: 'STF-02',
+      username: 'rizky',
+      name: 'Rizky Pratama',
+      role: 'Kasir & Barista Shift Malam',
+      accountType: 'KASIR',
+      pin: '2222',
+      phone: '0813-4455-6677',
+      active: true,
+      lastLoginAt: null
+    }
+  ],
+  tables: [
+    { id: 'TAKE-AWAY', name: 'Take Away', capacity: 0, zone: 'Counter', status: 'available' },
+    { id: 'M-01', name: 'Meja 01', capacity: 2, zone: 'Indoor AC', status: 'available' },
+    { id: 'M-02', name: 'Meja 02', capacity: 2, zone: 'Indoor AC', status: 'occupied' },
+    { id: 'M-03', name: 'Meja 03', capacity: 4, zone: 'Indoor AC', status: 'available' },
+    { id: 'M-04', name: 'Meja 04', capacity: 4, zone: 'Indoor AC', status: 'available' },
+    { id: 'M-05', name: 'Meja 05', capacity: 6, zone: 'Indoor Sofa', status: 'available' },
+    { id: 'M-06', name: 'Meja 06', capacity: 4, zone: 'Outdoor Smoking', status: 'available' },
+    { id: 'M-07', name: 'Meja 07', capacity: 4, zone: 'Outdoor Smoking', status: 'available' },
+    { id: 'M-08', name: 'Meja 08 (VIP)', capacity: 8, zone: 'VIP Room', status: 'available' }
+  ],
+  customers: [
+    { id: 'CUST-GENERAL', name: 'Pelanggan Umum', phone: '-', points: 0, visits: 0 },
+    { id: 'CUST-01', name: 'Kak Budi Santoso', phone: '081234567890', points: 140, visits: 12 },
+    { id: 'CUST-02', name: 'Kak Sinta Maharani', phone: '081398765432', points: 85, visits: 7 },
+    { id: 'CUST-03', name: 'Kak Andi Wijaya', phone: '085711223344', points: 210, visits: 19 }
+  ],
+  ingredients: [
+    {
+      id: 'ING-01',
+      name: 'Biji Kopi Arabica House Blend',
+      sku: 'BB-KOPI-01',
+      unit: 'gram',
+      stock: 4850,
+      minStock: 500,
+      costPerUnit: 280,
+      category: 'Bahan Minuman'
+    },
+    {
+      id: 'ING-02',
+      name: 'Susu Fresh Milk Full Cream',
+      sku: 'BB-SUSU-01',
+      unit: 'ml',
+      stock: 14200,
+      minStock: 2000,
+      costPerUnit: 24,
+      category: 'Bahan Minuman'
+    },
+    {
+      id: 'ING-03',
+      name: 'Bubuk Matcha Uji Premium',
+      sku: 'BB-MAT-01',
+      unit: 'gram',
+      stock: 1350,
+      minStock: 200,
+      costPerUnit: 450,
+      category: 'Bahan Minuman'
+    },
+    {
+      id: 'ING-04',
+      name: 'Bubuk Dark Chocolate Belgian',
+      sku: 'BB-CHOC-01',
+      unit: 'gram',
+      stock: 1800,
+      minStock: 300,
+      costPerUnit: 320,
+      category: 'Bahan Minuman'
+    },
+    {
+      id: 'ING-05',
+      name: 'Gula Aren Cair Organik',
+      sku: 'BB-AREN-01',
+      unit: 'ml',
+      stock: 3800,
+      minStock: 500,
+      costPerUnit: 35,
+      category: 'Pemanis & Sirup'
+    },
+    {
+      id: 'ING-06',
+      name: 'Simple Syrup Cair',
+      sku: 'BB-SYR-01',
+      unit: 'ml',
+      stock: 4200,
+      minStock: 500,
+      costPerUnit: 20,
+      category: 'Pemanis & Sirup'
+    },
+    {
+      id: 'ING-07',
+      name: 'Cup 16oz + Lid + Sedotan',
+      sku: 'BB-CUP-16',
+      unit: 'pcs',
+      stock: 320,
+      minStock: 50,
+      costPerUnit: 1200,
+      category: 'Kemasan'
+    },
+    {
+      id: 'ING-08',
+      name: 'Butter Croissant Artisan Dough',
+      sku: 'BB-CROIS-01',
+      unit: 'pcs',
+      stock: 38,
+      minStock: 10,
+      costPerUnit: 7500,
+      category: 'Bahan Makanan'
+    },
+    {
+      id: 'ING-09',
+      name: 'Cireng Bumbu Rujak Pack',
+      sku: 'BB-CIR-01',
+      unit: 'porsi',
+      stock: 35,
+      minStock: 8,
+      costPerUnit: 4500,
+      category: 'Bahan Makanan'
+    },
+    {
+      id: 'ING-10',
+      name: 'Dimsum Ayam Udang Premium',
+      sku: 'BB-DIM-01',
+      unit: 'pcs',
+      stock: 140,
+      minStock: 24,
+      costPerUnit: 2200,
+      category: 'Bahan Makanan'
+    },
+    {
+      id: 'ING-11',
+      name: 'Paket Beras & Bumbu Nasi Goreng',
+      sku: 'BB-NASGOR-01',
+      unit: 'porsi',
+      stock: 42,
+      minStock: 10,
+      costPerUnit: 6500,
+      category: 'Bahan Makanan'
+    },
+    {
+      id: 'ING-12',
+      name: 'Telur Ayam Negeri Segar',
+      sku: 'BB-TELUR-01',
+      unit: 'butir',
+      stock: 65,
+      minStock: 15,
+      costPerUnit: 2000,
+      category: 'Bahan Makanan'
+    }
+  ],
+  products: [
+    {
+      id: 'PRD-01',
+      name: 'Latte',
+      sku: 'CF-LATTE',
+      barcode: '899100200101',
+      category: 'Coffee',
+      isFeatured: true,
+      price: 22000,
+      hasRecipe: true,
+      printCupLabel: true,
+      stock: 0,
+      minStock: 0,
+      manualHpp: 0,
+      image: 'https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?auto=format&fit=crop&w=600&q=80',
+      recipe: [
+        { ingredientId: 'ING-01', qty: 18 },
+        { ingredientId: 'ING-02', qty: 160 },
+        { ingredientId: 'ING-06', qty: 15 },
+        { ingredientId: 'ING-07', qty: 1 }
+      ]
+    },
+    {
+      id: 'PRD-02',
+      name: 'Americano',
+      sku: 'CF-AMER',
+      barcode: '899100200102',
+      category: 'Coffee',
+      isFeatured: true,
+      price: 20000,
+      hasRecipe: true,
+      printCupLabel: true,
+      stock: 0,
+      minStock: 0,
+      manualHpp: 0,
+      image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80',
+      recipe: [
+        { ingredientId: 'ING-01', qty: 18 },
+        { ingredientId: 'ING-06', qty: 10 },
+        { ingredientId: 'ING-07', qty: 1 }
+      ]
+    },
+    {
+      id: 'PRD-03',
+      name: 'Chocolate',
+      sku: 'NC-CHOC',
+      barcode: '899100200103',
+      category: 'Non Coffee',
+      isFeatured: true,
+      price: 20000,
+      hasRecipe: true,
+      printCupLabel: true,
+      stock: 0,
+      minStock: 0,
+      manualHpp: 0,
+      image: 'https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=600&q=80',
+      recipe: [
+        { ingredientId: 'ING-04', qty: 20 },
+        { ingredientId: 'ING-02', qty: 150 },
+        { ingredientId: 'ING-06', qty: 15 },
+        { ingredientId: 'ING-07', qty: 1 }
+      ]
+    },
+    {
+      id: 'PRD-04',
+      name: 'Matcha',
+      sku: 'NC-MATCHA',
+      barcode: '899100200104',
+      category: 'Non Coffee',
+      isFeatured: true,
+      price: 25000,
+      hasRecipe: true,
+      printCupLabel: true,
+      stock: 0,
+      minStock: 0,
+      manualHpp: 0,
+      image: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80',
+      recipe: [
+        { ingredientId: 'ING-03', qty: 15 },
+        { ingredientId: 'ING-02', qty: 150 },
+        { ingredientId: 'ING-06', qty: 20 },
+        { ingredientId: 'ING-07', qty: 1 }
+      ]
+    },
+    {
+      id: 'PRD-05',
+      name: 'Croissant',
+      sku: 'FD-CROIS',
+      barcode: '899100200201',
+      category: 'Makanan',
+      isFeatured: true,
+      price: 20000,
+      hasRecipe: true,
+      printCupLabel: false,
+      stock: 0,
+      minStock: 0,
+      manualHpp: 0,
+      image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80',
+      recipe: [
+        { ingredientId: 'ING-08', qty: 1 }
+      ]
+    },
+    {
+      id: 'PRD-06',
+      name: 'Cireng',
+      sku: 'FD-CIRENG',
+      barcode: '899100200202',
+      category: 'Makanan',
+      isFeatured: true,
+      price: 15000,
+      hasRecipe: true,
+      printCupLabel: false,
+      stock: 0,
+      minStock: 0,
+      manualHpp: 0,
+      image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80',
+      recipe: [
+        { ingredientId: 'ING-09', qty: 1 }
+      ]
+    },
+    {
+      id: 'PRD-07',
+      name: 'Dimsum',
+      sku: 'FD-DIMSUM',
+      barcode: '899100200203',
+      category: 'Makanan',
+      isFeatured: true,
+      price: 25000,
+      hasRecipe: true,
+      printCupLabel: false,
+      stock: 0,
+      minStock: 0,
+      manualHpp: 0,
+      image: 'https://images.unsplash.com/photo-1496116218417-1a781b1c416c?auto=format&fit=crop&w=600&q=80',
+      recipe: [
+        { ingredientId: 'ING-10', qty: 4 }
+      ]
+    },
+    {
+      id: 'PRD-08',
+      name: 'Nasi Goreng',
+      sku: 'FD-NASGOR',
+      barcode: '899100200204',
+      category: 'Makanan',
+      isFeatured: true,
+      price: 20000,
+      hasRecipe: true,
+      printCupLabel: false,
+      stock: 0,
+      minStock: 0,
+      manualHpp: 0,
+      image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
+      recipe: [
+        { ingredientId: 'ING-11', qty: 1 },
+        { ingredientId: 'ING-12', qty: 1 }
+      ]
+    },
+    {
+      id: 'PRD-09',
+      name: 'Kopi Susu Gula Aren',
+      sku: 'CF-AREN',
+      barcode: '899100200105',
+      category: 'Coffee',
+      isFeatured: false,
+      price: 23000,
+      hasRecipe: true,
+      printCupLabel: true,
+      stock: 0,
+      minStock: 0,
+      manualHpp: 0,
+      image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80',
+      recipe: [
+        { ingredientId: 'ING-01', qty: 18 },
+        { ingredientId: 'ING-02', qty: 140 },
+        { ingredientId: 'ING-05', qty: 25 },
+        { ingredientId: 'ING-07', qty: 1 }
+      ]
+    },
+    {
+      id: 'PRD-10',
+      name: 'Kopi Botol Creamy 250ml',
+      sku: 'RT-BOTOL250',
+      barcode: '899100200301',
+      category: 'Kemasan',
+      isFeatured: false,
+      price: 28000,
+      hasRecipe: false,
+      printCupLabel: true,
+      stock: 24,
+      minStock: 5,
+      manualHpp: 13500,
+      image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=600&q=80',
+      recipe: []
+    },
+    {
+      id: 'PRD-11',
+      name: 'Mineral Water 600ml',
+      sku: 'RT-AQUA600',
+      barcode: '899100200302',
+      category: 'Kemasan',
+      isFeatured: false,
+      price: 8000,
+      hasRecipe: false,
+      printCupLabel: false,
+      stock: 48,
+      minStock: 12,
+      manualHpp: 3200,
+      image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=600&q=80',
+      recipe: []
+    },
+    {
+      id: 'PRD-12',
+      name: 'House Blend Beans 250g',
+      sku: 'RT-BEANS250',
+      barcode: '899100200303',
+      category: 'Kemasan',
+      isFeatured: false,
+      price: 85000,
+      hasRecipe: false,
+      printCupLabel: false,
+      stock: 14,
+      minStock: 4,
+      manualHpp: 52000,
+      image: 'https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&w=600&q=80',
+      recipe: []
+    }
+  ],
+  draftOrders: [
+    {
+      id: 'DRF-101',
+      tableId: 'M-02',
+      tableName: 'Meja 02',
+      customerName: 'Kak Sinta Maharani',
+      cashierName: 'Nadia Putri',
+      createdAt: '2026-10-31T21:15:00.000Z',
+      items: [
+        {
+          cartItemId: 'ci-seed-1',
+          productId: 'PRD-01',
+          name: 'Latte',
+          price: 22000,
+          qty: 2,
+          sugarLevel: 'Less Sugar',
+          iceLevel: 'Normal Ice',
+          notes: '1 cup oat milk',
+          printCupLabel: true
+        },
+        {
+          cartItemId: 'ci-seed-2',
+          productId: 'PRD-07',
+          name: 'Dimsum',
+          price: 25000,
+          qty: 1,
+          sugarLevel: '-',
+          iceLevel: '-',
+          notes: 'Saus chili oil pisah',
+          printCupLabel: false
+        }
+      ]
+    }
+  ],
+  transactions: [
+    {
+      id: 'TRX-20261031-001',
+      receiptNo: 'INV/261031/001',
+      createdAt: '2026-10-31T19:20:00.000Z',
+      cashierId: 'STF-01',
+      cashierName: 'Nadia Putri',
+      customerName: 'Kak Budi Santoso',
+      tableId: 'M-04',
+      tableName: 'Meja 04',
+      orderType: 'Dine In',
+      paymentMethod: 'QRIS',
+      subtotal: 67000,
+      discount: 0,
+      tax: 0,
+      total: 67000,
+      totalHpp: 29830,
+      grossProfit: 37170,
+      amountPaid: 67000,
+      change: 0,
+      status: 'COMPLETED',
+      kitchenStatus: 'PREPARING',
+      items: [
+        {
+          productId: 'PRD-04',
+          name: 'Matcha',
+          qty: 1,
+          price: 25000,
+          unitHpp: 11950,
+          subtotal: 25000,
+          sugarLevel: 'Normal Sugar',
+          iceLevel: 'Less Ice',
+          notes: '',
+          printCupLabel: true
+        },
+        {
+          productId: 'PRD-01',
+          name: 'Latte',
+          qty: 1,
+          price: 22000,
+          unitHpp: 10380,
+          subtotal: 22000,
+          sugarLevel: 'Less Sugar',
+          iceLevel: 'Normal Ice',
+          notes: '',
+          printCupLabel: true
+        },
+        {
+          productId: 'PRD-05',
+          name: 'Croissant',
+          qty: 1,
+          price: 20000,
+          unitHpp: 7500,
+          subtotal: 20000,
+          sugarLevel: '-',
+          iceLevel: '-',
+          notes: 'Hangatkan',
+          printCupLabel: false
+        }
+      ]
+    },
+    {
+      id: 'TRX-20261031-002',
+      receiptNo: 'INV/261031/002',
+      createdAt: '2026-10-31T20:45:00.000Z',
+      cashierId: 'STF-01',
+      cashierName: 'Nadia Putri',
+      customerName: 'Pelanggan Umum',
+      tableId: 'TAKE-AWAY',
+      tableName: 'Take Away',
+      orderType: 'Take Away',
+      paymentMethod: 'Tunai',
+      subtotal: 55000,
+      discount: 0,
+      tax: 0,
+      total: 55000,
+      totalHpp: 19440,
+      grossProfit: 35560,
+      amountPaid: 100000,
+      change: 45000,
+      status: 'COMPLETED',
+      kitchenStatus: 'QUEUE',
+      items: [
+        {
+          productId: 'PRD-02',
+          name: 'Americano',
+          qty: 1,
+          price: 20000,
+          unitHpp: 6440,
+          subtotal: 20000,
+          sugarLevel: 'No Sugar',
+          iceLevel: 'Normal Ice',
+          notes: '',
+          printCupLabel: true
+        },
+        {
+          productId: 'PRD-06',
+          name: 'Cireng',
+          qty: 1,
+          price: 15000,
+          unitHpp: 4500,
+          subtotal: 15000,
+          sugarLevel: '-',
+          iceLevel: '-',
+          notes: '',
+          printCupLabel: false
+        },
+        {
+          productId: 'PRD-08',
+          name: 'Nasi Goreng',
+          qty: 1,
+          price: 20000,
+          unitHpp: 8500,
+          subtotal: 20000,
+          sugarLevel: '-',
+          iceLevel: '-',
+          notes: 'Pedas sedang',
+          printCupLabel: false
+        }
+      ]
+    }
+  ],
+  shifts: [
+    {
+      id: 'SHF-20261031-01',
+      cashierId: 'STF-01',
+      cashierName: 'Nadia Putri',
+      openedAt: '2026-10-31T15:00:00.000Z',
+      closedAt: null,
+      status: 'OPEN',
+      openingCash: 300000,
+      cashMovements: [
+        {
+          id: 'CM-01',
+          type: 'OUT',
+          amount: 25000,
+          reason: 'Beli Es Batu Kristal Tambahan 2 Bal',
+          createdAt: '2026-10-31T18:10:00.000Z',
+          staffName: 'Nadia Putri'
+        }
+      ],
+      closingCashActual: null,
+      closingCashExpected: null,
+      variance: null,
+      notes: 'Shift Sore - Malam'
+    }
+  ],
+  auditLogs: [
+    {
+      id: 'AUD-01',
+      timestamp: '2026-10-31T15:00:00.000Z',
+      staffName: 'Nadia Putri',
+      role: 'Head Barista & Kasir',
+      action: 'BUKA_SHIFT',
+      category: 'SHIFT',
+      severity: 'info',
+      details: 'Membuka shift kasir dengan modal awal laci Rp 300.000'
+    },
+    {
+      id: 'AUD-02',
+      timestamp: '2026-10-31T18:10:00.000Z',
+      staffName: 'Nadia Putri',
+      role: 'Head Barista & Kasir',
+      action: 'KAS_KELUAR',
+      category: 'CASH',
+      severity: 'warning',
+      details: 'Kas keluar Rp 25.000 — Beli Es Batu Kristal Tambahan 2 Bal'
+    },
+    {
+      id: 'AUD-03',
+      timestamp: '2026-10-31T19:20:00.000Z',
+      staffName: 'Nadia Putri',
+      role: 'Head Barista & Kasir',
+      action: 'TRANSAKSI_BAYAR',
+      category: 'SALES',
+      severity: 'info',
+      details: 'Transaksi INV/261031/001 sebesar Rp 67.000 (QRIS - Meja 04) berhasil dibayar'
+    },
+    {
+      id: 'AUD-04',
+      timestamp: '2026-10-31T20:45:00.000Z',
+      staffName: 'Nadia Putri',
+      role: 'Head Barista & Kasir',
+      action: 'TRANSAKSI_BAYAR',
+      category: 'SALES',
+      severity: 'info',
+      details: 'Transaksi INV/261031/002 sebesar Rp 55.000 (Tunai - Take Away) berhasil dibayar'
+    },
+    {
+      id: 'AUD-05',
+      timestamp: '2026-10-31T21:15:00.000Z',
+      staffName: 'Nadia Putri',
+      role: 'Head Barista & Kasir',
+      action: 'SIMPAN_DRAFT',
+      category: 'ORDER',
+      severity: 'info',
+      details: 'Menyimpan pesanan Open Bill Meja 02 (Kak Sinta Maharani) senilai Rp 69.000'
+    }
+  ]
+};
+
