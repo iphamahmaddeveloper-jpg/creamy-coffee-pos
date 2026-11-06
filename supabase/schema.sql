@@ -166,3 +166,4 @@ AFTER INSERT ON orders
 FOR EACH ROW
 WHEN (NEW.status = 'PAID')
 EXECUTE FUNCTION deduct_inventory_on_order_paid();
+

@@ -269,3 +269,4 @@ Untuk mendukung arsitektur *Single Page Application* (React + Vite) di Netlify a
 4. **Petunjuk Unggah ke LMS Kampus:**
    - Unggah file `docs/LAPORAN_PERANCANGAN_POS.md` (atau konversi ke PDF bila LMS mewajibkan ekstensi `.pdf`).
    - Sertakan link repositori GitHub dan tangkapan layar kedua diagram SVG pada kolom penyerahan tugas kelompok sebelum Pertemuan 6.
+

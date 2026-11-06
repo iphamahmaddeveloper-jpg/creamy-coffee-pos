@@ -1,7 +1,7 @@
 import { initialData } from '../data/seedData.js';
 import { isSupabaseConfigured, syncOrderToSupabase } from './supabase.js';
 
-const STORAGE_KEY = 'creamy_coffee_pos_db_v2';
+const STORAGE_KEY = 'creamy_coffee_pos_db_v3';
 
 function loadClientDb() {
   try {
@@ -9,6 +9,10 @@ function loadClientDb() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed.products) && parsed.products.length > 0) {
+        // Ensure staffList is up-to-date with initialData staff accounts
+        if (!Array.isArray(parsed.staffList) || parsed.staffList.length === 0) {
+          parsed.staffList = structuredClone(initialData.staffList);
+        }
         return parsed;
       }
     }
@@ -130,7 +134,8 @@ export async function handleClientApi(url, options = {}) {
     }
   }
 
-  const pathname = url.split('?')[0];
+  const [pathname, queryString] = url.split('?');
+  const searchParams = new URLSearchParams(queryString || '');
 
   // 1. GET /api/state
   if (pathname === '/api/state' && method === 'GET') {
@@ -142,14 +147,56 @@ export async function handleClientApi(url, options = {}) {
 
   // 2. POST /api/auth/login
   if (pathname === '/api/auth/login' && method === 'POST') {
-    const { username, pin } = body;
-    const staff = (db.staffList || []).find((s) => s.username === username && s.pin === pin && s.active !== false);
+    const { identifier = '', username = '', pin = '' } = body;
+    const cleanId = String(identifier || username).trim().toLowerCase();
+    const cleanPin = String(pin).trim();
+
+    const staff = (db.staffList || []).find(
+      (s) =>
+        (s.id && s.id.toLowerCase() === cleanId) ||
+        (s.username && s.username.toLowerCase() === cleanId) ||
+        (s.name && s.name.toLowerCase() === cleanId)
+    );
+
     if (!staff) {
-      return new Response(JSON.stringify({ error: 'Username atau PIN salah!' }), {
+      addAuditLog(db, {
+        staffName: identifier || 'Unknown',
+        role: 'Unauthenticated',
+        action: 'LOGIN_GAGAL',
+        category: 'AUTH',
+        severity: 'warning',
+        details: `Percobaan login gagal: Akun "${cleanId}" tidak ditemukan.`
+      });
+      saveClientDb(db);
+      return new Response(JSON.stringify({ error: 'Akun tidak ditemukan. Periksa kembali pilihan akun / username.' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
     }
+
+    if (staff.active === false) {
+      return new Response(JSON.stringify({ error: 'Akun kasir ini sedang dinonaktifkan oleh Superadmin.' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (String(staff.pin).trim() !== cleanPin) {
+      addAuditLog(db, {
+        staffName: staff.name,
+        role: staff.role,
+        action: 'LOGIN_GAGAL',
+        category: 'AUTH',
+        severity: 'danger',
+        details: `Percobaan login gagal untuk "${staff.name}": PIN salah!`
+      });
+      saveClientDb(db);
+      return new Response(JSON.stringify({ error: 'PIN Keamanan salah! Periksa kembali PIN Anda.' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     staff.lastLoginAt = new Date().toISOString();
     addAuditLog(db, {
       staffName: staff.name,
@@ -157,7 +204,7 @@ export async function handleClientApi(url, options = {}) {
       action: 'LOGIN_SUCCESS',
       category: 'AUTH',
       severity: 'info',
-      details: `Staf ${staff.name} berhasil login.`
+      details: `Staf ${staff.name} (${staff.accountType}) berhasil login.`
     });
     saveClientDb(db);
     return new Response(JSON.stringify({ success: true, user: staff, state: buildStateResponse(db) }), {
@@ -341,8 +388,6 @@ export async function handleClientApi(url, options = {}) {
     });
 
     saveClientDb(db);
-
-    // Asynchronously sync to Supabase if configured
     syncOrderToSupabase(newTx);
 
     return new Response(JSON.stringify({ success: true, transaction: newTx, state: buildStateResponse(db) }), {
@@ -389,7 +434,42 @@ export async function handleClientApi(url, options = {}) {
     });
   }
 
-  // 6. POST /api/shifts/close
+  // 6. POST /api/shifts/cash-movement
+  if (pathname === '/api/shifts/cash-movement' && method === 'POST') {
+    const { type, amount, reason, staffName = 'Kasir' } = body;
+    const activeShift = (db.shifts || []).find((s) => s.status === 'OPEN');
+    if (activeShift) {
+      if (!Array.isArray(activeShift.cashMovements)) activeShift.cashMovements = [];
+      activeShift.cashMovements.push({
+        id: `CM-${Date.now()}`,
+        time: new Date().toISOString(),
+        type,
+        amount: Number(amount),
+        reason,
+        staffName
+      });
+      if (type === 'IN') {
+        activeShift.cashIn = (activeShift.cashIn || 0) + Number(amount);
+      } else {
+        activeShift.cashOut = (activeShift.cashOut || 0) + Number(amount);
+      }
+      addAuditLog(db, {
+        staffName,
+        role: 'Kasir',
+        action: type === 'IN' ? 'KAS_MASUK' : 'KAS_KELUAR',
+        category: 'SHIFT',
+        severity: 'info',
+        details: `Kas ${type}: Rp ${Number(amount).toLocaleString('id-ID')} (${reason})`
+      });
+      saveClientDb(db);
+    }
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 7. POST /api/shifts/close
   if (pathname === '/api/shifts/close' && method === 'POST') {
     const { shiftId, actualCash, notes = '', cashierName = 'Kasir' } = body;
     const shift = (db.shifts || []).find((s) => s.id === shiftId);
@@ -418,7 +498,260 @@ export async function handleClientApi(url, options = {}) {
     });
   }
 
-  // 7. POST /api/reset-demo
+  // 8. POST /api/tables
+  if (pathname === '/api/tables' && method === 'POST') {
+    const { name, capacity = 4, zone = 'Indoor' } = body;
+    const newTable = {
+      id: `M-${Date.now().toString().slice(-4)}`,
+      name,
+      capacity: Number(capacity),
+      zone,
+      status: 'available',
+      occupiedBy: null,
+      occupiedSince: null
+    };
+    if (!Array.isArray(db.tables)) db.tables = [];
+    db.tables.push(newTable);
+    saveClientDb(db);
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 9. POST /api/tables/:id/release
+  if (pathname.startsWith('/api/tables/') && pathname.endsWith('/release') && method === 'POST') {
+    const tableId = pathname.replace('/api/tables/', '').replace('/release', '');
+    const table = (db.tables || []).find((t) => t.id === tableId);
+    if (table) {
+      table.status = 'available';
+      table.occupiedBy = null;
+      table.occupiedSince = null;
+      saveClientDb(db);
+    }
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 10. POST /api/drafts
+  if (pathname === '/api/drafts' && method === 'POST') {
+    const { id, tableId, tableName, customerName = 'Pelanggan Walk-in', cashierName = 'Kasir', items = [] } = body;
+    if (id) {
+      const idx = (db.draftOrders || []).findIndex((d) => d.id === id);
+      if (idx !== -1) {
+        db.draftOrders[idx] = {
+          ...db.draftOrders[idx],
+          tableId,
+          tableName,
+          customerName,
+          cashierName,
+          updatedAt: new Date().toISOString(),
+          items
+        };
+      }
+    } else {
+      if (!Array.isArray(db.draftOrders)) db.draftOrders = [];
+      db.draftOrders.unshift({
+        id: `DRF-${Date.now().toString().slice(-6)}`,
+        tableId,
+        tableName,
+        customerName,
+        cashierName,
+        createdAt: new Date().toISOString(),
+        items
+      });
+      const table = (db.tables || []).find((t) => t.id === tableId);
+      if (table && table.id !== 'TAKE-AWAY') {
+        table.status = 'occupied';
+        table.occupiedBy = customerName;
+        table.occupiedSince = new Date().toISOString();
+      }
+    }
+    saveClientDb(db);
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 11. DELETE /api/drafts/:id
+  if (pathname.startsWith('/api/drafts/') && method === 'DELETE') {
+    const draftId = pathname.replace('/api/drafts/', '');
+    db.draftOrders = (db.draftOrders || []).filter((d) => d.id !== draftId);
+    saveClientDb(db);
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 12. POST /api/products
+  if (pathname === '/api/products' && method === 'POST') {
+    const product = body;
+    if (product.id) {
+      const idx = (db.products || []).findIndex((p) => p.id === product.id);
+      if (idx !== -1) {
+        db.products[idx] = { ...db.products[idx], ...product };
+      }
+    } else {
+      product.id = `PRD-${Date.now().toString().slice(-4)}`;
+      if (!Array.isArray(db.products)) db.products = [];
+      db.products.push(product);
+    }
+    saveClientDb(db);
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 13. DELETE /api/products/:id
+  if (pathname.startsWith('/api/products/') && method === 'DELETE') {
+    const prodId = pathname.replace('/api/products/', '');
+    db.products = (db.products || []).filter((p) => p.id !== prodId);
+    saveClientDb(db);
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 14. POST /api/ingredients
+  if (pathname === '/api/ingredients' && method === 'POST') {
+    const ing = body;
+    if (ing.id) {
+      const idx = (db.ingredients || []).findIndex((i) => i.id === ing.id);
+      if (idx !== -1) {
+        db.ingredients[idx] = { ...db.ingredients[idx], ...ing };
+      }
+    } else {
+      ing.id = `ING-${Date.now().toString().slice(-4)}`;
+      if (!Array.isArray(db.ingredients)) db.ingredients = [];
+      db.ingredients.push(ing);
+    }
+    saveClientDb(db);
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 15. POST /api/inventory/adjust
+  if (pathname === '/api/inventory/adjust' && method === 'POST') {
+    const { ingredientId, type, amount, reason, staffName = 'Kasir' } = body;
+    const ing = (db.ingredients || []).find((i) => i.id === ingredientId);
+    if (ing) {
+      const delta = Number(amount || 0);
+      if (type === 'RESTOCK' || type === 'IN') {
+        ing.stock = Number(ing.stock || 0) + delta;
+      } else if (type === 'OPNAME') {
+        ing.stock = delta;
+      } else {
+        ing.stock = Math.max(0, Number(ing.stock || 0) - delta);
+      }
+      addAuditLog(db, {
+        staffName,
+        role: 'Kasir',
+        action: `INVENTORY_${type}`,
+        category: 'INVENTORY',
+        severity: 'info',
+        details: `${ing.name}: ${type} ${delta} ${ing.unit} (${reason})`
+      });
+      saveClientDb(db);
+    }
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 16. PATCH /api/kitchen/:id
+  if (pathname.startsWith('/api/kitchen/') && method === 'PATCH') {
+    const kotId = pathname.replace('/api/kitchen/', '');
+    const { status } = body;
+    const order = (db.kitchenOrders || []).find((k) => k.id === kotId);
+    if (order) {
+      order.status = status;
+      if (status === 'READY') {
+        order.completedAt = new Date().toISOString();
+      }
+      saveClientDb(db);
+    }
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 17. PUT /api/store-profile
+  if (pathname === '/api/store-profile' && method === 'PUT') {
+    const { storeProfile, staffList, staffName = 'Owner' } = body;
+    if (storeProfile) {
+      db.storeProfile = { ...db.storeProfile, ...storeProfile };
+    }
+    if (Array.isArray(staffList)) {
+      db.staffList = staffList;
+    }
+    addAuditLog(db, {
+      staffName,
+      role: 'Owner Cafe',
+      action: 'UPDATE_STORE_PROFILE',
+      category: 'SETTINGS',
+      severity: 'info',
+      details: 'Memperbarui profil kafe dan staf.'
+    });
+    saveClientDb(db);
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 18. POST /api/transactions/:id/void
+  if (pathname.startsWith('/api/transactions/') && pathname.endsWith('/void') && method === 'POST') {
+    const txId = pathname.replace('/api/transactions/', '').replace('/void', '');
+    const { reason = 'Kesalahan Kasir', staffName = 'Kasir' } = body;
+    const tx = (db.transactions || []).find((t) => t.id === txId);
+    if (tx) {
+      tx.status = 'VOID';
+      tx.voidReason = reason;
+      tx.voidedBy = staffName;
+      tx.voidedAt = new Date().toISOString();
+
+      // Return ingredient stocks
+      const ingMap = new Map((db.ingredients || []).map((i) => [i.id, i]));
+      const prodMap = new Map((db.products || []).map((p) => [p.id, p]));
+      (tx.items || []).forEach((item) => {
+        const prod = prodMap.get(item.productId);
+        if (prod && prod.hasRecipe && Array.isArray(prod.recipe)) {
+          prod.recipe.forEach((r) => {
+            const ing = ingMap.get(r.ingredientId);
+            if (ing) {
+              ing.stock = Math.round((Number(ing.stock) + Number(r.amount) * Number(item.qty)) * 100) / 100;
+            }
+          });
+        }
+      });
+
+      addAuditLog(db, {
+        staffName,
+        role: 'Kasir',
+        action: 'VOID_TRANSACTION',
+        category: 'TRANSACTION',
+        severity: 'danger',
+        details: `Void Transaksi ${tx.invoiceNumber}: ${reason}`
+      });
+      saveClientDb(db);
+    }
+    return new Response(JSON.stringify(buildStateResponse(db)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 19. POST /api/reset-demo
   if (pathname === '/api/reset-demo' && method === 'POST') {
     const fresh = structuredClone(initialData);
     saveClientDb(fresh);
@@ -428,7 +761,24 @@ export async function handleClientApi(url, options = {}) {
     });
   }
 
-  // Default handler for all other routes: return current state
+  // 20. POST /api/customers
+  if (pathname === '/api/customers' && method === 'POST') {
+    const { name, phone = '-' } = body;
+    const newCust = {
+      id: `CST-${Date.now().toString().slice(-4)}`,
+      name,
+      phone
+    };
+    if (!Array.isArray(db.customers)) db.customers = [];
+    db.customers.push(newCust);
+    saveClientDb(db);
+    return new Response(JSON.stringify({ customer: newCust, state: buildStateResponse(db) }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // Default fallback
   return new Response(JSON.stringify(buildStateResponse(db)), {
     status: 200,
     headers: { 'Content-Type': 'application/json' }
@@ -447,14 +797,14 @@ export function setupClientApiBridge() {
     if (url.startsWith('/api/') || url.includes('/api/')) {
       try {
         const response = await originalFetch(input, init);
-        // If server returns HTML (SPA 404 redirect on Netlify) or 404, fallback to client mock
         const contentType = response.headers.get('content-type') || '';
+        // If server returns HTML (e.g. Netlify 404 SPA redirect) or 404/502
         if (!response.ok || contentType.includes('text/html')) {
           return await handleClientApi(url, init);
         }
         return response;
       } catch (err) {
-        // Network error / server not running -> use client API mock
+        // Network error -> use client API mock
         return await handleClientApi(url, init);
       }
     }
